@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<beans xmlns="http://www.springframework.org/schema/beans" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-4.0.xsd">
+
+    <!-- 설정 파일을 로드 -->
+    <bean id="egov.propertyConfigurer" class="org.springframework.beans.factory.config.PropertyPlaceholderConfigurer">
+        <property name="locations">
+            <list>
+                <value>classpath:/egovframework/globals.properties</value>
+            </list>
+        </property>
+    </bean>
+
+    <!--
+    객체 이름을 id에 할당
+    class 는 자신이 config 자바 클래스를 작성 했던 경로로 설정 해줘야 합니다.
+    ${Globals.baseurl} => 이 이름은 properties 에 작성 했던 그 변수 이름입니다.
+    -->
+    <bean id="globalConfigValues" class="com.teachingcash.common.Config">
+        <property name="driverClassName" value="${server.db.driverClassName}"/>
+        <property name="url" value="${server.db.url}"/>
+        <property name="username" value="${server.db.username}"/>
+        <property name="password" value="${server.db.password}"/>
+        <property name="fcm_push_key" value="${server.fcm.push.key}"/>
+        <property name="uploadPath" value="${server.upload.path}"/>
+    </bean>
+
+
+</beans>

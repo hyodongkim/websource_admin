@@ -1,0 +1,96 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.teachingcash.saadmin.mapper.AdminmemberMapper">
+    <sql id="where">
+        <if test='search_type != null and !search_type.equals("")'>
+            AND (type LIKE CONCAT('%',#{search_type},'%'))
+        </if>
+        <if test='search_name != null and !search_name.equals("")'>
+            AND (adminid LIKE CONCAT('%',#{search_name},'%') or name LIKE CONCAT('%',#{search_name},'%') or email LIKE CONCAT('%',#{search_name},'%'))
+        </if>
+        <if test='search_enabled != null and !search_enabled.equals("")'>
+            AND (enabled LIKE CONCAT('%',#{search_enabled},'%'))
+        </if>
+    </sql>
+    <select id="selectAdminmember" parameterType="adminmemberVO" resultType="adminmemberVO">
+        SELECT
+            A.*, B.id as files_id, B.upload_path, B.original_name
+        FROM adminmembers A left outer join files B on A.id = B.parent_id and B.parent_type = 'adminmember'
+        WHERE A.id = #{id}
+    </select>
+
+    <select id="selectCntAdminmember" parameterType="adminmemberVO" resultType="int">
+        SELECT
+        count(*)
+        FROM adminmembers
+        WHERE 1 = 1
+        <include refid="where"/>
+    </select>
+
+    <insert id="insertAdminmember" parameterType="adminmemberVO">
+        insert into adminmembers (adminid, passwd, type, name, email, phone, signup_date, company, dept, title, memo, recent_access, enabled, reg_datetime)
+        values (#{adminid}, #{passwd}, #{type}, #{name}, #{email}, #{phone}, #{signup_date}, #{company}, #{dept}, #{title}, #{memo}, null, #{enabled}, NOW());
+    </insert>
+    <delete id="deleteAdminmember" parameterType="adminmemberVO">
+        update
+            adminmembers
+        set enabled = '삭제'
+        WHERE
+            id = #{id}
+    </delete>
+    <select id="listAdminmember" parameterType="adminmemberVO" resultType="adminmemberVO">
+        SELECT
+        A.*, B.id as files_id, B.upload_path, B.original_name
+        FROM adminmembers A left outer join files B on A.id = B.parent_id and B.parent_type = 'adminmember'
+        where 1=1
+        <include refid="where"/>
+        order by A.id DESC
+        LIMIT #{start}, #{limit}
+    </select>
+
+
+    <update id="update" parameterType="adminmemberVO">
+        UPDATE
+            adminmembers
+        SET
+            adminid = #{adminid},
+        <if test='passwd != null'>
+            passwd = md5(#{passwd}),
+        </if>
+            type = #{type},
+            name = #{name},
+            email = #{email},
+            phone = #{phone},
+            signup_date = #{signup_date},
+            company  = #{company},
+            dept = #{dept},
+            title = #{title},
+            memo = #{memo},
+            enabled  = #{enabled},
+            reg_datetime = NOW()
+        WHERE
+            id = #{id}
+    </update>
+
+    <select id="getMaxPkAdminmember" resultType="int">
+        select max(id) from adminmembers
+    </select>
+
+    <select id="selectAdminmemberLogin" parameterType="adminmemberVO" resultType="adminmemberVO">
+        SELECT
+            *
+        FROM adminmembers
+        WHERE adminid = #{adminid}
+          AND passwd = md5(#{passwd})
+          AND enabled = '이용중'
+    </select>
+
+    <update id="updateRecentAccess" parameterType="adminmemberVO">
+        UPDATE
+            adminmembers
+        SET
+            recent_access = NOW()
+        WHERE
+            id = #{id}
+    </update>
+</mapper>

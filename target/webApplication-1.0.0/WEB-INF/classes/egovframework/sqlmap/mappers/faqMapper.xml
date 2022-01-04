@@ -1,0 +1,77 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.teachingcash.saadmin.mapper.FaqMapper">
+    <sql id="where">
+        <if test='keyword != null and !subject.equals("")'>
+            AND (question LIKE CONCAT('%',#{keyword},'%'))
+        </if>
+    </sql>
+    <select id="selectCntFaq" parameterType="faqVO" resultType="int">
+        SELECT
+        count(*)
+        FROM faqs
+        WHERE 1 = 1
+        <include refid="where"/>
+    </select>
+
+    <select id="selectFaq" parameterType="faqVO" resultType="faqVO">
+        SELECT
+            *
+        FROM faqs
+        WHERE id = #{id}
+    </select>
+
+    <insert id="insertFaq" parameterType="faqVO">
+        insert into faqs (type, question, content_editor, author, order_by, enabled, reg_datetime)
+        values (#{type}, #{question}, #{content_editor}, #{author}, #{order_by}, #{enabled}, NOW());
+    </insert>
+    <delete id="deleteFaq" parameterType="faqVO">
+        DELETE FROM
+            faqs
+        WHERE
+            id = #{id}
+    </delete>
+    <select id="listFaq" parameterType="faqVO" resultType="faqVO">
+        SELECT
+        A.*
+        FROM faqs A
+        where 1=1
+        <include refid="where"/>
+        order by A.`type` ASC, A.order_by ASC
+        LIMIT #{start}, #{limit}
+    </select>
+
+
+    <update id="update" parameterType="faqVO">
+        UPDATE
+            faqs
+        SET
+            type = #{type},
+            question = #{question},
+            content_editor = #{content_editor},
+            author = #{author},
+            order_by = #{order_by},
+            enabled = #{enabled},
+            reg_datetime  = NOW()
+        WHERE
+            id = #{id}
+    </update>
+
+    <select id="getMaxPkFaq" resultType="int">
+        select max(id) from faqs
+    </select>
+
+    <select id="getSameOrderBy" parameterType="int" resultType="int">
+        select count(*) from faqs where order_by = #{order_by}
+    </select>
+
+    <update id="updateOrderByIncrease" parameterType="int">
+        update faqs set order_by = order_by + 1 where order_by > #{order_by}
+    </update>
+
+    <update id="updateOrderBy" parameterType="com.teachingcash.saadmin.vo.FaqVO">
+        update faqs set order_by = #{order_by} where id=#{id}
+    </update>
+
+
+</mapper>

@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.teachingcash.saadmin.mapper.VersionMapper">
+    <sql id="where">
+        <if test='keyword != null and !subject.equals("")'>
+            AND (os LIKE CONCAT('%',#{keyword},'%'))
+        </if>
+    </sql>
+    <select id="selectVersion" parameterType="versionVO" resultType="versionVO">
+        SELECT
+            A.*, B.id as files_id, B.upload_path, B.original_name
+        FROM versions A left outer join files B on A.id = B.parent_id and B.parent_type = 'version'
+        WHERE A.id = #{id}
+    </select>
+
+    <select id="selectCntVersion" parameterType="versionVO" resultType="int">
+        SELECT
+        count(*)
+        FROM versions
+        WHERE 1 = 1
+        <include refid="where"/>
+    </select>
+
+    <insert id="insertVersion" parameterType="versionVO">
+        INSERT INTO
+            versions
+        (os, version, reg_datetime)
+        values
+            (#{os}, #{version}, NOW())
+    </insert>
+    <delete id="deleteVersion" parameterType="versionVO">
+        DELETE FROM
+            versions
+        WHERE
+            id = #{id}
+    </delete>
+    <select id="listVersion" parameterType="versionVO" resultType="versionVO">
+        SELECT
+        A.*, B.id as files_id, B.upload_path, B.original_name
+        FROM versions A left outer join files B on A.id = B.parent_id and B.parent_type = 'version'
+        where 1=1
+        <include refid="where"/>
+        order by A.id DESC
+        LIMIT #{start}, #{limit}
+    </select>
+
+
+    <update id="update" parameterType="versionVO">
+        UPDATE
+            versions
+        SET os = #{os}, version = #{version}, reg_datetime = NOW()
+        WHERE
+            id = #{id}
+    </update>
+
+   <select id="getMaxPkVersion" resultType="int">
+        select max(id) from versions
+    </select>
+
+</mapper>

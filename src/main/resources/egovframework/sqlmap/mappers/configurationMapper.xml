@@ -1,0 +1,77 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.teachingcash.saadmin.mapper.ConfigurationMapper">
+    <!--<sql id="where">
+        <if test='keyword != null and !subject.equals("")'>
+            AND (title LIKE CONCAT('%',#{keyword},'%'))
+        </if>
+    </sql>-->
+    <select id="selectConfiguration" parameterType="configurationVO" resultType="configurationVO">
+        SELECT
+            A.*
+        FROM configuration A
+    </select>
+
+    <select id="selectCntConfiguration" parameterType="configurationVO" resultType="int">
+        SELECT
+        count(*)
+        FROM configuration
+        WHERE 1 = 1
+        <!--<include refid="where"/>-->
+    </select>
+
+    <insert id="insertConfiguration" parameterType="configurationVO">
+        insert into configuration (title, description, tag, staff, email, telephone)
+        values (#{title}, #{description}, #{tag}, #{staff}, #{email}, #{telephone});
+    </insert>
+    <!--<delete id="deleteConfiguration" parameterType="configurationVO">
+        DELETE FROM
+            configuration
+        WHERE
+            title = #{title}
+    </delete>-->
+
+
+    <update id="update" parameterType="configurationVO">
+        UPDATE
+            configuration
+        SET
+            title = #{title},
+            description = #{description},
+            tag = #{tag},
+            staff = #{staff},
+            email = #{email},
+            telephone  = #{telephone}
+    </update>
+
+    <select id="getMaxPkConfiguration" resultType="int">
+        select max(id) from configuration
+    </select>
+    <!--
+       <select id="listCategory" resultType="configurationVO">
+           select category from configuration group by category
+       </select>
+
+       <select id="listCategoryEn" resultType="configurationVO">
+           select category_en from configuration group by category_en
+       </select>
+
+       <select id="selectConfigurationPrev" parameterType="configurationVO" resultType="configurationVO">
+           SELECT
+               A.*, B.seq, B.upload_path
+           FROM configuration A left outer join tbl_file B on A.id = B.parent_seq
+           WHERE id &lt; #{id}
+           ORDER BY id DESC
+               LIMIT 1
+       </select>
+
+       <select id="selectConfigurationNext" parameterType="configurationVO" resultType="configurationVO">
+           SELECT
+               A.*, B.seq, B.upload_path
+           FROM configuration A left outer join tbl_file B on A.id = B.parent_seq
+           WHERE id &gt; #{id}
+           ORDER BY id ASC
+               LIMIT 1
+       </select>-->
+
+</mapper>

@@ -1,0 +1,103 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.teachingcash.saadmin.mapper.BlogMapper">
+    <sql id="where">
+        <if test='keyword != null and !subject.equals("")'>
+            AND (subject LIKE CONCAT('%',#{keyword},'%') OR content_en LIKE CONCAT('%',#{keyword},'%') OR content_ko LIKE CONCAT('%',#{keyword},'%'))
+        </if>
+    </sql>
+    <select id="selectBlog" parameterType="blogVO" resultType="blogVO">
+        SELECT
+            A.*, B.seq, B.upload_path
+        FROM tbl_blog A left outer join tbl_file B on A.pk_blog = B.parent_seq
+        WHERE pk_blog = #{pk_blog}
+    </select>
+
+    <select id="selectCntBlog" parameterType="blogVO" resultType="int">
+        SELECT
+        count(*)
+        FROM tbl_blog
+        WHERE 1 = 1
+        <include refid="where"/>
+    </select>
+
+    <insert id="insertBlog" parameterType="blogVO">
+        INSERT INTO
+            tbl_blog
+                (subject, subject_en, content_en, content_ko, reg_timestamp, cnt, category, category_en, is_toppost)
+        values
+            (#{subject}, #{subject_en}, #{content_en}, #{content_ko}, NOW(), '0', #{category}, #{category_en}, #{is_toppost})
+    </insert>
+    <delete id="deleteBlog" parameterType="blogVO">
+        DELETE FROM
+        tbl_blog
+        WHERE
+        pk_blog = #{pk_blog}
+    </delete>
+    <select id="listBlog" parameterType="blogVO" resultType="blogVO">
+        SELECT
+            A.*, B.seq, B.upload_path
+        FROM tbl_blog A left outer join tbl_file B on A.pk_blog = B.parent_seq
+        where 1=1
+        <include refid="where"/>
+        order by A.pk_blog DESC
+        OFFSET #{start} limit #{limit}
+    </select>
+
+    <select id="listBlogTopPost" parameterType="blogVO" resultType="blogVO">
+        SELECT
+        A.*, B.seq, B.upload_path
+        FROM tbl_blog A left outer join tbl_file B on A.pk_blog = B.parent_seq
+        where 1=1 and is_toppost = 'Y'
+        order by A.pk_blog DESC
+        offset 1 limit 3
+    </select>
+
+    <select id="getTopPost" resultType="blogVO">
+        SELECT
+            A.*, B.seq, B.upload_path
+        FROM tbl_blog A left outer join tbl_file B on A.pk_blog = B.parent_seq
+        where 1=1 and is_toppost = 'Y'
+        order by A.pk_blog DESC
+        offset 0 limit 1
+    </select>
+
+    <update id="update" parameterType="blogVO">
+        UPDATE
+            tbl_blog
+        SET subject = #{subject}, subject_en = #{subject_en}, content_en = #{content_en}, content_ko = #{content_ko}, category = #{category}, category_en = #{category_en}, reg_timestamp = NOW(), is_toppost = #{is_toppost}
+        WHERE
+            pk_blog = #{pk_blog}
+    </update>
+
+    <select id="getMaxPkBlog" resultType="int">
+        select max(pk_blog) from tbl_blog
+    </select>
+
+    <select id="listCategory" resultType="blogVO">
+        select category from tbl_blog group by category
+    </select>
+
+    <select id="listCategoryEn" resultType="blogVO">
+        select category_en from tbl_blog group by category_en
+    </select>
+
+    <select id="selectBlogPrev" parameterType="blogVO" resultType="blogVO">
+        SELECT
+            A.*, B.seq, B.upload_path
+        FROM tbl_blog A left outer join tbl_file B on A.pk_blog = B.parent_seq
+        WHERE pk_blog &lt; #{pk_blog}
+        ORDER BY pk_blog DESC
+        LIMIT 1
+    </select>
+
+    <select id="selectBlogNext" parameterType="blogVO" resultType="blogVO">
+        SELECT
+        A.*, B.seq, B.upload_path
+        FROM tbl_blog A left outer join tbl_file B on A.pk_blog = B.parent_seq
+        WHERE pk_blog &gt; #{pk_blog}
+        ORDER BY pk_blog ASC
+        LIMIT 1
+    </select>
+
+</mapper>

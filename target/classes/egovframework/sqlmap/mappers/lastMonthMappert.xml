@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.teachingcash.saadmin.mapper.LastMonthMapper">
+    <sql id="where">
+        <if test='rental_product_id != null and !rental_product_id.equals("")'>
+            AND (rental_product_id LIKE CONCAT('%',#{rental_product_id},'%'))
+        </if>
+    </sql>
+    <select id="selectLastMonth" parameterType="last_monthVO" resultType="last_monthVO">
+        SELECT
+            *
+        FROM last_month
+        WHERE rental_product_id = #{rental_product_id}
+    </select>
+
+    <select id="selectCntLastMonth" parameterType="last_monthVO" resultType="int">
+        SELECT
+        count(*)
+        FROM last_month
+        WHERE 1 = 1
+        <include refid="where"/>
+    </select>
+
+    <insert id="insertLastMonth" parameterType="last_monthVO">
+        insert into last_month (rental_product_id, usage_amount, discount_amount)
+        values (#{rental_product_id}, #{usage_amount}, #{discount_amount});
+    </insert>
+    <delete id="deleteLastMonth" parameterType="int">
+        DELETE FROM
+            last_month
+        WHERE
+            rental_product_id = #{rental_product_id}
+    </delete>
+    <select id="listLastMonth" parameterType="last_monthVO" resultType="last_monthVO">
+        SELECT
+        *
+        FROM last_month
+        where 1=1
+        <include refid="where"/>
+        order by A.id DESC
+        LIMIT #{start}, #{limit}
+    </select>
+    <update id="update" parameterType="last_monthVO">
+        UPDATE
+            last_month
+        SET
+            rental_product_id = #{rental_product_id},
+            usage_amount = #{usage_amount},
+            discount_amount = #{discount_amount}
+        WHERE
+            id = #{id}
+    </update>
+
+    <select id="getMaxPkLastMonth" resultType="int">
+        select max(id) from last_month
+    </select>
+</mapper>

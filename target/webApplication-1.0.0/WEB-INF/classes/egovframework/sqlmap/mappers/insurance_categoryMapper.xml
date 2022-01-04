@@ -1,0 +1,77 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.teachingcash.saadmin.mapper.Insurance_categoryMapper">
+    <sql id="where">
+        <if test='search_name != null'>
+            AND (name LIKE CONCAT('%',#{search_name},'%'))
+        </if>
+        <if test='search_code != null'>
+            AND (code LIKE CONCAT('%',#{search_code},'%'))
+        </if>
+        <if test='search_enabled != null'>
+            AND (enabled LIKE CONCAT('%',#{search_enabled},'%'))
+        </if>
+    </sql>
+
+    <select id="selectInsurance_category" parameterType="insurance_categoryVO" resultType="insurance_categoryVO">
+        SELECT
+            A.*, B.id as files_id, B.upload_path, B.original_name
+        FROM insurance_categories A left outer join files B on A.id = B.parent_id and B.parent_type = 'insurance_category'
+        WHERE A.id = #{id}
+    </select>
+
+    <select id="selectCntInsurance_category" parameterType="insurance_categoryVO" resultType="int">
+        SELECT
+        count(*)
+        FROM insurance_categories
+        WHERE 1 = 1
+        <include refid="where"/>
+    </select>
+
+    <insert id="insertInsurance_category" parameterType="insurance_categoryVO">
+        insert into insurance_categories (name, code, num_of_products, enabled, visible_order, reg_datetime)
+        values (#{name}, #{code}, #{num_of_products}, #{enabled}, #{visible_order}, NOW());
+    </insert>
+
+    <delete id="deleteInsurance_category" parameterType="insurance_categoryVO">
+        DELETE FROM
+            insurance_categories
+        WHERE
+            id = #{id}
+    </delete>
+    <select id="listInsurance_category" parameterType="insurance_categoryVO" resultType="insurance_categoryVO">
+        SELECT
+        A.*, B.id as files_id, B.upload_path, B.original_name,
+               (select count(*) from insurance_products where category = A.code) as products_cnt
+        FROM insurance_categories A left outer join files B on A.id = B.parent_id and B.parent_type = 'insurance_category'
+        where 1=1
+        <include refid="where"/>
+        order by A.id DESC
+        LIMIT #{start}, #{limit}
+    </select>
+
+    <update id="update" parameterType="insurance_categoryVO">
+        UPDATE
+            insurance_categories
+        SET
+            name = #{name},
+            code = #{code},
+            num_of_products = #{num_of_products},
+            enabled  = #{enabled},
+            visible_order = #{visible_order},
+            reg_datetime = NOW()
+        WHERE
+            id = #{id}
+    </update>
+
+    <select id="getMaxPkInsurance_category" resultType="int">
+        select max(id) from insurance_categories
+    </select>
+
+    <select id="listEnabledInsuranceCategory" resultType="insurance_categoryVO">
+        SELECT *
+        FROM insurance_categories
+        WHERE enabled = '사용'
+        ORDER BY visible_order ASC
+    </select>
+</mapper>

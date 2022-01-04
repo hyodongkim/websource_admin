@@ -1,0 +1,158 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.teachingcash.saadmin.mapper.SurveyMapper">
+    <select id="selectSurvey" parameterType="int" resultType="surveyVO">
+        SELECT
+            A.*
+        FROM surveys A
+        WHERE A.id = #{id}
+    </select>
+
+    <select id="selectSurveysExamples" parameterType="int" resultType="com.teachingcash.saadmin.vo.SurveyExamplesVO">
+        SELECT
+            *
+        FROM surveys_examples
+        WHERE surveys_questions_id = #{surveys_questions_id}
+        ORDER BY order_by ASC
+    </select>
+
+    <select id="selectSurveysQuestions" parameterType="int" resultType="com.teachingcash.saadmin.vo.SurveyQuestionsVO">
+        SELECT
+            *
+        FROM surveys_questions
+        WHERE surveys_id = #{surveys_id}
+        ORDER BY no ASC
+    </select>
+
+    <select id="selectCntSurvey" parameterType="surveyVO" resultType="int">
+        SELECT
+            count(*)
+        FROM surveys
+        WHERE 1 = 1
+    </select>
+
+    <insert id="insertSurvey" parameterType="surveyVO">
+        insert into surveys (is_show, survey_title, duration, benefit, date_start, date_end, introduction, reg_datetime)
+        values (#{is_show}, #{survey_title}, #{duration}, #{benefit}, #{date_start}, #{date_end}, #{introduction}, NOW());
+    </insert>
+    <delete id="deleteSurvey" parameterType="surveyVO">
+        DELETE FROM
+            surveys
+        WHERE
+            id = #{id}
+    </delete>
+
+    <delete id="deleteSurveyExample" parameterType="int">
+        delete from
+            surveys_examples
+        where
+            surveys_questions_id = #{surveys_questions_id}
+    </delete>
+
+    <delete id="deleteSurveyQuestion" parameterType="int">
+        delete from
+            surveys_questions
+        where
+            surveys_id = #{surveys_id}
+    </delete>
+
+    <insert id="insertSurveyExample" parameterType="surveyExamplesVO">
+        insert into surveys_examples (surveys_questions_id, answer_text, type, order_by)
+        values (#{surveys_questions_id}, #{answer_text}, #{type}, #{order_by});
+    </insert>
+
+    <insert id="insertSurveyQuestion" parameterType="surveyExamplesVO">
+        insert into surveys_questions (surveys_id, no, question, is_multi_answer)
+        values (#{surveys_id}, #{no}, #{question}, #{is_multi_answer});
+    </insert>
+
+    <select id="listSurvey" parameterType="surveyVO" resultType="surveyVO">
+        SELECT
+        A.*
+        FROM surveys A
+        where 1=1
+        <!--<include refid="where"/>-->
+        order by A.id DESC
+        LIMIT #{start}, #{limit}
+    </select>
+
+
+    <update id="updateSurvey" parameterType="surveyVO">
+        UPDATE
+            surveys
+        SET
+            is_show = #{is_show},
+            survey_title = #{survey_title},
+            duration = #{duration},
+            benefit = #{benefit},
+            date_start = #{date_start},
+            date_end = #{date_end},
+            introduction = #{introduction},
+            reg_datetime = NOW()
+        WHERE
+            id = #{id}
+    </update>
+
+    <select id="getMaxPkSurvey" resultType="int">
+        select max(id) from surveys
+    </select>
+
+    <select id="getMaxPkSurveyQuestions" resultType="int">
+        select max(id) from surveys_questions
+    </select>
+
+    <select id="getPercentResult" parameterType="String" resultType="com.teachingcash.saadmin.vo.SurveyAnswersVO">
+        SELECT answer_text, ROUND( (
+
+                                       SELECT if(COUNT( * ) = 0, 0, COUNT( * ))
+                                       FROM surveys_answers B
+                                       WHERE A.id = B.surveys_examples_id ) / (
+                                       SELECT if(COUNT( * ) = 0, 1, COUNT( * ))
+                                       FROM surveys_answers C
+                                       WHERE C.surveys_questions_id = A.surveys_questions_id ) *100
+            ) AS result_percent,
+               (
+
+                   SELECT if(COUNT( * ) = 0, 0, COUNT( * ))
+                   FROM surveys_answers B
+                   WHERE A.id = B.surveys_examples_id ) as answer_cnt,
+               (
+
+                   SELECT if(COUNT( * ) = 0, 0, COUNT( * ))
+                   FROM surveys_answers B
+                   WHERE A.surveys_questions_id= B.surveys_questions_id ) as total_answer_cnt,
+
+               IF( (
+
+                       SELECT TYPE FROM surveys_examples
+                       WHERE surveys_questions_id = A.surveys_questions_id
+                         AND id = A.id
+                   ) = '객관식', '', (
+
+                       SELECT GROUP_CONCAT( subjective_answer SEPARATOR  ' / ' )
+                       FROM surveys_answers D
+                       WHERE surveys_questions_id = A.surveys_questions_id
+                         AND surveys_examples_id
+                           IN (
+
+                                 SELECT id
+                                 FROM surveys_examples
+                                 WHERE surveys_questions_id = A.surveys_questions_id
+                                   AND TYPE = '주관식'
+                             ) )
+                   ) AS text_answer
+        FROM surveys_examples A
+        WHERE surveys_questions_id = #{surveys_questions_id}
+        ORDER BY order_by ASC
+    </select>
+
+    <select id="selectSubjectiveAnswer" parameterType="String" resultType="String">
+        SELECT subjective_answer
+        FROM surveys_answers
+        WHERE surveys_questions_id = #{surveys_questions_id} and surveys_examples_id in (select id from surveys_examples where surveys_questions_id = #{surveys_questions_id} and type = '주관식')
+    </select>
+
+    <update id="toggleSurvey" parameterType="String">
+        update surveys_config set is_show = #{is_show}
+    </update>
+</mapper>

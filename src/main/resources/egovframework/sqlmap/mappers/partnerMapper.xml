@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.teachingcash.saadmin.mapper.PartnerMapper">
+    <sql id="where">
+        <if test='keyword != null and field.equals("all")'>
+            AND (name LIKE CONCAT('%',#{keyword},'%') or name_last LIKE CONCAT('%',#{keyword},'%') or phone LIKE CONCAT('%',#{keyword},'%'))
+        </if>
+        <if test='keyword != null and !field.equals("all")'>
+            AND ${field} LIKE CONCAT('%',#{keyword},'%')
+        </if>
+    </sql>
+    <select id="selectPartner" parameterType="partnerVO" resultType="partnerVO">
+        SELECT
+            reg_timestamp + '2 hour'::interval as reg_timestamp, *
+        FROM tbl_partner
+        WHERE pk_partner = #{pk_partner}
+    </select>
+
+    <select id="selectCntPartner" parameterType="partnerVO" resultType="int">
+        SELECT
+        count(*)
+        FROM tbl_partner
+        WHERE 1 = 1
+        <include refid="where"/>
+    </select>
+
+    <insert id="insertPartner" parameterType="partnerVO">
+        INSERT INTO
+            tbl_partner
+        (name, name_last, email, position, country, phone, company_name, industry, partner_type, ip, reg_timestamp, process_yn, is_agree)
+        values
+        (#{name}, #{name_last}, #{email}, #{position }, #{country}, #{phone}, #{company_name}, #{industry}, #{partner_type}, #{ip}, NOW(), 'N', #{is_agree})
+    </insert>
+
+    <update id="updateProcessYN" parameterType="partnerVO">
+        UPDATE
+            tbl_partner
+        SET process_yn = #{process_yn}
+        WHERE
+            pk_partner = #{pk_partner}
+    </update>
+    <delete id="deletePartner" parameterType="partnerVO">
+        DELETE FROM
+            tbl_partner
+        WHERE
+            pk_partner = #{pk_partner}
+    </delete>
+    <select id="listPartner" parameterType="partnerVO" resultType="java.util.HashMap">
+        SELECT
+        reg_timestamp + '2 hour'::interval as reg_timestamp, *
+        FROM tbl_partner
+        where 1=1
+        <include refid="where"/>
+        order by pk_partner DESC
+        OFFSET #{start} limit #{limit}
+    </select>
+</mapper>

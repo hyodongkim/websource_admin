@@ -1,0 +1,74 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.teachingcash.saadmin.mapper.BannerMapper">
+    <sql id="where">
+        <if test='search_position != null and !search_position.equals("")'>
+            AND (position LIKE CONCAT('%',#{search_position},'%'))
+        </if>
+        <if test='search_enabled != null and !search_enabled.equals("")'>
+            AND (enabled LIKE CONCAT('%',#{search_enabled},'%'))
+        </if>
+        <if test='search_name != null and !search_name.equals("")'>
+            AND (name LIKE CONCAT('%',#{search_name},'%'))
+        </if>
+    </sql>
+    <select id="selectBanner" parameterType="bannerVO" resultType="bannerVO">
+        SELECT
+            A.*, B.id as files_id, B.upload_path, B.original_name
+        FROM banners A left outer join files B on A.id = B.parent_id and B.parent_type = 'banner'
+        WHERE A.id = #{id}
+    </select>
+
+    <select id="selectCntBanner" parameterType="bannerVO" resultType="int">
+        SELECT
+        count(*)
+        FROM banners
+        WHERE 1 = 1
+        <include refid="where"/>
+    </select>
+
+    <insert id="insertBanner" parameterType="bannerVO">
+        insert into banners (name, date_start, date_end, alt_text, link, click_count, enabled,
+                                position, reg_datetime, order_by)
+        values (#{name}, #{date_start}, #{date_end}, #{alt_text}, #{link}, #{click_count}, #{enabled},
+                #{position}, NOW(), #{order_by});
+    </insert>
+    <delete id="deleteBanner" parameterType="bannerVO">
+        DELETE FROM
+            banners
+        WHERE
+            id = #{id}
+    </delete>
+    <select id="listBanner" parameterType="bannerVO" resultType="bannerVO">
+        SELECT
+        A.*, B.id as files_id, B.upload_path, B.original_name
+        FROM banners A left outer join files B on A.id = B.parent_id and B.parent_type = 'banner'
+        where 1=1
+        <include refid="where"/>
+        order by `position` ASC, order_by ASC
+        LIMIT #{start}, #{limit}
+    </select>
+
+    <update id="update" parameterType="bannerVO">
+        UPDATE
+            banners
+        SET
+            name = #{name},
+            date_start = #{date_start},
+            date_end = #{date_end},
+            alt_text = #{alt_text},
+            link  = #{link},
+            click_count = #{click_count},
+            enabled  = #{enabled},
+            position = #{position},
+            reg_datetime = NOW(),
+            order_by = #{order_by}
+        WHERE
+            id = #{id}
+    </update>
+
+    <select id="getMaxPkBanner" resultType="int">
+        select max(id) from banners
+    </select>
+
+</mapper>

@@ -1,0 +1,170 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.teachingcash.saadmin.mapper.Rental_productMapper">
+    <sql id="where">
+        <if test='search_cat_name != null and !search_cat_name.equals("")'>
+            AND (category in (select code from rental_categories where name LIKE CONCAT('%',#{search_cat_name},'%')))
+        </if>
+        <if test='search_product_name != null and !search_product_name.equals("")'>
+            AND (product_name LIKE CONCAT('%',#{search_product_name},'%'))
+        </if>
+        <if test='search_maker != null and !search_maker.equals("")'>
+            AND (maker LIKE CONCAT('%',#{search_maker},'%'))
+        </if>
+        <if test='search_model != null and !search_model.equals("")'>
+            AND (model LIKE CONCAT('%',#{search_model},'%'))
+        </if>
+        <if test='search_seller_code != null and !search_seller_code.equals("")'>
+            AND (seller_code LIKE CONCAT('%',#{search_seller_code},'%'))
+        </if>
+        <if test='search_maker_code != null and !search_maker_code.equals("")'>
+            AND (maker_code LIKE CONCAT('%',#{search_maker_code},'%'))
+        </if>
+    </sql>
+    <select id="selectRental_product" parameterType="rental_productVO" resultType="rental_productVO">
+        SELECT
+            A.*,
+               B.id as files_id1, B.upload_path as upload_path1, B.original_name as original_name1,
+               C.id as files_id2, C.upload_path as upload_path2, C.original_name as original_name2,
+               D.id as files_id3, D.upload_path as upload_path3, D.original_name as original_name3,
+               E.id as files_id4, E.upload_path as upload_path4, E.original_name as original_name4,
+               F.id as files_id5, F.upload_path as upload_path5, F.original_name as original_name5
+        FROM rental_products A
+                 left outer join files B on A.id = B.parent_id and B.parent_type = 'rental_brand'
+                 left outer join files C on A.id = C.parent_id and C.parent_type = 'rental_item1'
+                 left outer join files D on A.id = D.parent_id and D.parent_type = 'rental_item2'
+                 left outer join files E on A.id = E.parent_id and E.parent_type = 'rental_item3'
+                 left outer join files F on A.id = F.parent_id and F.parent_type = 'rental_desc'
+        WHERE A.id = #{id}
+    </select>
+
+    <select id="selectCntRental_product" parameterType="rental_productVO" resultType="int">
+        SELECT
+        count(*)
+        FROM rental_products
+        WHERE 1 = 1
+        <include refid="where"/>
+    </select>
+
+    <insert id="insertRental_product" parameterType="rental_productVO">
+        insert into rental_products (product_name, maker, apply_link, model, category, delivery_type, ownership,
+                                     specification, approval, sales, seller_code, maker_code, sell_start_date,
+                                     sell_end_date, one_time_payment, card_company, card_name, annual_fee_domestic_only, annual_fee_overseas, issue_apply, issue_apply_tel,
+                                     issue_apply_url, product_announcement, shipping_info, refund_info, minor_purchase,
+                                     counseling_telephone, company_name, president, location, contact, brn,
+                                     reg_datetime)
+        values (#{product_name}, #{maker}, #{apply_link}, #{model}, #{category}, #{delivery_type}, #{ownership},
+                #{specification}, #{approval}, #{sales}, #{seller_code}, #{maker_code}, #{sell_start_date},
+                #{sell_end_date}, #{one_time_payment}, #{card_company}, #{card_name}, #{annual_fee_domestic_only}, #{annual_fee_overseas}, #{issue_apply}, #{issue_apply_tel},
+                #{issue_apply_url}, #{product_announcement}, #{shipping_info}, #{refund_info},
+                #{minor_purchase}, #{counseling_telephone}, #{company_name}, #{president},
+                #{location}, #{contact}, #{brn}, NOW())
+    </insert>
+    <delete id="deleteRental_product" parameterType="rental_productVO">
+        DELETE FROM
+            rental_products
+        WHERE
+            id = #{id}
+    </delete>
+    <select id="listRental_product" parameterType="rental_productVO" resultType="rental_productVO">
+        SELECT
+            A.*,
+            B.id as files_id1, B.upload_path as upload_path1, B.original_name as original_name1,
+            C.id as files_id2, C.upload_path as upload_path2, C.original_name as original_name2,
+            D.id as files_id3, D.upload_path as upload_path3, D.original_name as original_name3,
+            E.id as files_id4, E.upload_path as upload_path4, E.original_name as original_name4,
+            F.id as files_id5, F.upload_path as upload_path5, F.original_name as original_name5,
+            (select name from rental_categories G where G.code = A.category) as category_name
+        FROM rental_products A
+            left outer join files B on A.id = B.parent_id and B.parent_type = 'rental_brand'
+            left outer join files C on A.id = C.parent_id and C.parent_type = 'rental_item1'
+            left outer join files D on A.id = D.parent_id and D.parent_type = 'rental_item2'
+            left outer join files E on A.id = E.parent_id and E.parent_type = 'rental_item3'
+            left outer join files F on A.id = F.parent_id and F.parent_type = 'rental_desc'
+        where 1=1
+        <include refid="where"/>
+        order by A.id DESC
+        LIMIT #{start}, #{limit}
+    </select>
+
+    <update id="update" parameterType="rental_productVO">
+        UPDATE
+            rental_products
+        SET
+            product_name = #{product_name},
+            maker = #{maker},
+            apply_link = #{apply_link},
+            model = #{model},
+            category = #{category},
+            delivery_type = #{delivery_type},
+            ownership = #{ownership},
+            specification = #{specification},
+            approval = #{approval},
+            sales = #{sales},
+            seller_code = #{seller_code},
+            maker_code = #{maker_code},
+            sell_start_date = #{sell_start_date},
+            sell_end_date = #{sell_end_date},
+            one_time_payment = #{one_time_payment},
+            card_company = #{card_company},
+            card_name = #{card_name},
+            annual_fee_domestic_only = #{annual_fee_domestic_only},
+            annual_fee_overseas = #{annual_fee_overseas},
+            issue_apply = #{issue_apply},
+            issue_apply_tel = #{issue_apply_tel},
+            issue_apply_url = #{issue_apply_url},
+            product_announcement = #{product_announcement},
+            product_announcement_note = #{product_announcement_note},
+            shipping_info = #{shipping_info},
+            shipping_info_note = #{shipping_info_note},
+            refund_info = #{refund_info},
+            refund_info_note = #{refund_info_note},
+            minor_purchase = #{minor_purchase},
+            counseling_telephone = #{counseling_telephone},
+            company_name = #{company_name},
+            president = #{president},
+            location = #{location},
+            contact = #{contact},
+            brn = #{brn},
+            reg_datetime = NOW()
+        WHERE
+            id = #{id}
+    </update>
+
+    <select id="getMaxPkRental_product" resultType="int">
+        select max(id) from rental_products
+    </select>
+
+    <select id="selectRentalAgreement" parameterType="com.teachingcash.saadmin.vo.RentalAgreementVO">
+        select * from rental_agreement where rental_id = #{rental_id}
+    </select>
+
+    <insert id="insertRentalAgreement" parameterType="com.teachingcash.saadmin.vo.RentalAgreementVO">
+        insert into rental_agreement set
+            rental_id = #{rental_id},
+            `period` = #{period},
+            price = #{price}
+    </insert>
+
+    <select id="selectRentalLastmonth" parameterType="com.teachingcash.saadmin.vo.RentalLastmonth">
+        select * from rental_lastmonth where rental_id = #{rental_id}
+    </select>
+
+    <insert id="insertRentalLastmonth" parameterType="com.teachingcash.saadmin.vo.RentalLastmonth">
+        insert into rental_lastmonth set
+            rental_id = #{rental_id},
+            performance = #{performance},
+            dc_price = #{dc_price}
+    </insert>
+
+    <delete id="deleteRentalAgreement" parameterType="com.teachingcash.saadmin.vo.RentalAgreementVO">
+        delete from rental_agreement where rental_id = #{rental_id}
+    </delete>
+
+    <delete id="deleteRentalLastmonth" parameterType="com.teachingcash.saadmin.vo.RentalLastmonth">
+        delete from rental_lastmonth where rental_id = #{rental_id}
+    </delete>
+
+
+
+</mapper>

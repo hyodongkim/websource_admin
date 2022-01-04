@@ -1,0 +1,105 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.teachingcash.saadmin.mapper.PushMapper">
+    <sql id="where">
+        <if test='keyword != null and !subject.equals("")'>
+            AND (name LIKE CONCAT('%',#{keyword},'%'))
+        </if>
+    </sql>
+    <select id="selectPush" parameterType="pushVO" resultType="pushVO">
+        SELECT
+            A.*, B.id as files_id, B.upload_path, B.original_name
+        FROM pushes A left outer join files B on A.id = B.parent_id and B.parent_type = 'push'
+        WHERE A.id = #{id}
+    </select>
+
+    <select id="selectCntPush" parameterType="pushVO" resultType="int">
+        SELECT
+        count(*)
+        FROM pushes
+        WHERE 1 = 1
+        <include refid="where"/>
+    </select>
+
+    <insert id="insertPush" parameterType="pushVO">
+        insert into pushes (type, device, content, sending, reg_datetime)
+        values (#{type}, #{device}, #{content}, #{sending}, NOW());
+    </insert>
+    <delete id="deletePush" parameterType="pushVO">
+        DELETE FROM
+            pushes
+        WHERE
+            id = #{id}
+    </delete>
+    <select id="listPush" parameterType="pushVO" resultType="pushVO">
+        SELECT
+        A.*, B.id as files_id, B.upload_path, B.original_name
+        FROM pushes A left outer join files B on A.id = B.parent_id and B.parent_type = 'push'
+        where 1=1
+        <include refid="where"/>
+        order by A.id DESC
+        LIMIT #{start}, #{limit}
+    </select>
+    <!--
+        <select id="listPushTopPost" parameterType="pushVO" resultType="pushVO">
+            SELECT
+                A.*, B.seq, B.upload_path
+            FROM pushes A left outer join tbl_file B on A.id = B.parent_seq
+            where 1=1 and is_toppost = 'Y'
+            order by A.id DESC
+            offset 1 limit 3
+        </select>
+
+        <select id="getTopPost" resultType="pushVO">
+            SELECT
+                A.*, B.seq, B.upload_path
+            FROM pushes A left outer join tbl_file B on A.id = B.parent_seq
+            where 1=1 and is_toppost = 'Y'
+            order by A.id DESC
+            offset 0 limit 1
+        </select>-->
+
+    <update id="update" parameterType="pushVO">
+        UPDATE
+            pushes
+        SET
+            type = #{type},
+            device = #{device},
+            content = #{content},
+            sending  = #{sending},
+            reg_datetime = NOW()
+        WHERE
+            id = #{id}
+    </update>
+
+    <select id="getMaxPkPush" resultType="int">
+        select max(id) from pushes
+    </select>
+    <!--
+       <select id="listCategory" resultType="pushVO">
+           select category from pushes group by category
+       </select>
+
+       <select id="listCategoryEn" resultType="pushVO">
+           select category_en from pushes group by category_en
+       </select>
+
+       <select id="selectPushPrev" parameterType="pushVO" resultType="pushVO">
+           SELECT
+               A.*, B.seq, B.upload_path
+           FROM pushes A left outer join tbl_file B on A.id = B.parent_seq
+           WHERE id &lt; #{id}
+           ORDER BY id DESC
+               LIMIT 1
+       </select>
+
+       <select id="selectPushNext" parameterType="pushVO" resultType="pushVO">
+           SELECT
+               A.*, B.seq, B.upload_path
+           FROM pushes A left outer join tbl_file B on A.id = B.parent_seq
+           WHERE id &gt; #{id}
+           ORDER BY id ASC
+               LIMIT 1
+       </select>-->
+
+</mapper>

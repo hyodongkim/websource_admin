@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.teachingcash.saadmin.mapper.SalesConditionMapper">
+    <sql id="where">
+        <if test='rental_product_id != null and !rental_product_id.equals("")'>
+            AND (rental_product_id LIKE CONCAT('%',#{rental_product_id},'%'))
+        </if>
+    </sql>
+    <select id="selectSalesCondition" parameterType="com.teachingcash.saadmin.vo.SalesConditionVO" resultType="com.teachingcash.saadmin.vo.SalesConditionVO">
+        SELECT
+            *
+        FROM sales_condition
+        WHERE rental_product_id = #{rental_product_id}
+    </select>
+
+    <select id="selectCntSalesCondition" parameterType="sales_conditionVO" resultType="int">
+        SELECT
+        count(*)
+        FROM sales_condition
+        WHERE 1 = 1
+        <include refid="where"/>
+    </select>
+
+    <insert id="insertSalesCondition" parameterType="sales_conditionVO">
+        insert into sales_condition (rental_product_id, price, commitment_terms)
+        values (#{rental_product_id}, #{price}, #{commitment_terms});
+    </insert>
+    <delete id="deleteSalesCondition" parameterType="int">
+        DELETE FROM
+            sales_condition
+        WHERE
+            rental_product_id = #{rental_product_id}
+    </delete>
+    <select id="listSalesCondition" parameterType="sales_conditionVO" resultType="sales_conditionVO">
+        SELECT
+            *
+        FROM sales_condition
+        where 1=1
+        <include refid="where"/>
+        order by A.id DESC
+        LIMIT #{start}, #{limit}
+    </select>
+    <update id="update" parameterType="sales_conditionVO">
+        UPDATE
+            sales_condition
+        SET
+            rental_product_id = #{rental_product_id},
+            price = #{price},
+            commitment_terms = #{commitment_terms}
+        WHERE
+            id = #{id}
+    </update>
+
+    <select id="getMaxPkSalesCondition" resultType="int">
+        select max(id) from sales_condition
+    </select>
+</mapper>

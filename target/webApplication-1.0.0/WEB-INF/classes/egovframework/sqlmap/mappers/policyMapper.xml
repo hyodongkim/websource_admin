@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.teachingcash.saadmin.mapper.PolicyMapper">
+    <select id="selectPolicy" parameterType="policyVO" resultType="policyVO">
+        SELECT
+            *
+        FROM policies
+        WHERE id = #{id}
+    </select>
+
+    <select id="selectCntPolicy" parameterType="policyVO" resultType="int">
+        SELECT
+        count(*)
+        FROM policies
+        WHERE 1 = 1
+    </select>
+
+    <insert id="insertPolicy" parameterType="policyVO">
+        insert into policies (name, content_editor, consent, enabled, reg_datetime)
+        values (#{name}, #{content_editor}, #{consent}, #{enabled}, NOW());
+    </insert>
+    <delete id="deletePolicy" parameterType="policyVO">
+        DELETE FROM
+            policies
+        WHERE
+            id = #{id}
+    </delete>
+    <select id="listPolicy" parameterType="policyVO" resultType="policyVO">
+        SELECT
+        *
+        FROM policies
+        where 1=1
+        order by id DESC
+        LIMIT #{start}, #{limit}
+    </select>
+
+
+    <update id="update" parameterType="policyVO">
+        UPDATE
+            policies
+        SET
+            name = #{name},
+            content_editor = #{content_editor},
+            consent = #{consent},
+            enabled = #{enabled},
+            reg_datetime = NOW()
+        WHERE
+            id = #{id}
+    </update>
+
+    <select id="getMaxPkPolicy" resultType="int">
+        select max(id) from policies
+    </select>
+
+</mapper>

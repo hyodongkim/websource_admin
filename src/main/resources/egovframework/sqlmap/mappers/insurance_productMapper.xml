@@ -1,0 +1,72 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.teachingcash.saadmin.mapper.Insurance_productMapper">
+    <sql id="where">
+        <if test='search_product_name != null'>
+            AND (product_name LIKE CONCAT('%',#{search_product_name},'%'))
+        </if>
+        <if test='search_maker != null'>
+            AND (maker LIKE CONCAT('%',#{search_maker},'%'))
+        </if>
+    </sql>
+    <select id="selectInsurance_product" parameterType="insurance_productVO" resultType="insurance_productVO">
+        select A.*, B.id as files_id1, B.upload_path as upload_path1, B.original_name as original_name1,
+        C.id as files_id2, C.upload_path as upload_path2, C.original_name as original_name2
+        FROM insurance_products A left outer join files B on A.id = B.parent_id and B.parent_type = 'insurance_product'
+        left outer join files C on A.id = C.parent_id and C.parent_type = 'insurance_desc'
+        WHERE A.id = #{id}
+    </select>
+
+    <select id="selectCntInsurance_product" parameterType="insurance_productVO" resultType="int">
+        SELECT
+        count(*)
+        FROM insurance_products
+        WHERE 1 = 1
+        <include refid="where"/>
+    </select>
+
+    <insert id="insertInsurance_product" parameterType="insurance_productVO">
+        insert into insurance_products (maker, apply_link, product_name, features, category, approval, sales, reg_datetime)
+        values (#{maker}, #{apply_link}, #{product_name}, #{features}, #{category}, #{approval}, #{sales}, NOW());
+    </insert>
+    <delete id="deleteInsurance_product" parameterType="insurance_productVO">
+        DELETE FROM
+            insurance_products
+        WHERE
+            id = #{id}
+    </delete>
+    <select id="listInsurance_product" parameterType="insurance_productVO" resultType="insurance_productVO">
+        SELECT
+        A.*, B.id as files_id1, B.upload_path as upload_path1, B.original_name as original_name1,
+        C.id as files_id2, C.upload_path as upload_path2, C.original_name as original_name2,
+        (select name from insurance_categories where code = A.category) as category_name
+        FROM insurance_products A left outer join files B on A.id = B.parent_id and B.parent_type = 'insurance_product'
+        left outer join files C on A.id = C.parent_id and C.parent_type = 'insurance_desc'
+        where 1=1
+        <include refid="where"/>
+        order by A.id DESC
+        LIMIT #{start}, #{limit}
+    </select>
+
+    <update id="update" parameterType="insurance_productVO">
+        UPDATE
+            insurance_products
+        SET
+            maker = #{maker},
+            apply_link = #{apply_link},
+            product_name = #{product_name},
+            features = #{features},
+            category = #{category},
+            approval = #{approval},
+            sales = #{sales},
+            reg_datetime = NOW()
+        WHERE
+            id = #{id}
+    </update>
+
+    <select id="getMaxPkInsurance_product" resultType="int">
+        select max(id) from insurance_products
+    </select>
+
+
+</mapper>

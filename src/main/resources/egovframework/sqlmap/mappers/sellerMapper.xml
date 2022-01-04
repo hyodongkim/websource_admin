@@ -1,0 +1,113 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.teachingcash.saadmin.mapper.SellerMapper">
+    <sql id="where">
+        <if test='search_type != null and !search_type.equals("")'>
+            AND (type LIKE CONCAT('%',#{search_type},'%'))
+        </if>
+        <if test='search_name != null and !search_name.equals("")'>
+            AND (name LIKE CONCAT('%',#{search_name},'%'))
+        </if>
+        <if test='search_code != null and !search_code.equals("")'>
+            AND (code LIKE CONCAT('%',#{search_code},'%'))
+        </if>
+    </sql>
+    <select id="selectSeller" parameterType="sellerVO" resultType="sellerVO">
+        SELECT
+            A.*, B.id as files_id, B.upload_path, B.original_name
+        FROM sellers A left outer join files B on A.id = B.parent_id and B.parent_type = 'seller'
+        WHERE A.id = #{id}
+    </select>
+
+    <select id="selectCntSeller" parameterType="sellerVO" resultType="int">
+        SELECT
+        count(*)
+        FROM sellers
+        WHERE 1 = 1
+        <include refid="where"/>
+    </select>
+
+    <insert id="insertSeller" parameterType="sellerVO">
+        insert into sellers (type, name, num_of_uses, code, color, reg_datetime)
+        values (#{type}, #{name}, #{num_of_uses}, #{code}, #{color}, NOW());
+    </insert>
+    <delete id="deleteSeller" parameterType="sellerVO">
+        DELETE FROM
+            sellers
+        WHERE
+            id = #{id}
+    </delete>
+    <select id="listSeller" parameterType="sellerVO" resultType="sellerVO">
+        SELECT
+        A.*, B.id as files_id, B.upload_path, B.original_name,
+               (select count(*) from business_malls where A.code = mall_cd) as used_cnt
+        FROM sellers A left outer join files B on A.id = B.parent_id and B.parent_type = 'seller'
+        where 1=1
+        <include refid="where"/>
+        order by A.id DESC
+        LIMIT #{start}, #{limit}
+    </select>
+    <!--
+        <select id="listSellerTopPost" parameterType="sellerVO" resultType="sellerVO">
+            SELECT
+                A.*, B.seq, B.upload_path
+            FROM sellers A left outer join tbl_file B on A.id = B.parent_seq
+            where 1=1 and is_toppost = 'Y'
+            order by A.id DESC
+            offset 1 limit 3
+        </select>
+
+        <select id="getTopPost" resultType="sellerVO">
+            SELECT
+                A.*, B.seq, B.upload_path
+            FROM sellers A left outer join tbl_file B on A.id = B.parent_seq
+            where 1=1 and is_toppost = 'Y'
+            order by A.id DESC
+            offset 0 limit 1
+        </select>-->
+
+    <update id="update" parameterType="sellerVO">
+        UPDATE
+            sellers
+        SET
+            type = #{type},
+            name = #{name},
+            num_of_uses = #{num_of_uses},
+            code = #{code},
+            color = #{color},
+            reg_datetime = NOW()
+        WHERE
+            id = #{id}
+    </update>
+
+    <select id="getMaxPkSeller" resultType="int">
+        select max(id) from sellers
+    </select>
+    <!--
+       <select id="listCategory" resultType="sellerVO">
+           select category from sellers group by category
+       </select>
+
+       <select id="listCategoryEn" resultType="sellerVO">
+           select category_en from sellers group by category_en
+       </select>
+
+       <select id="selectSellerPrev" parameterType="sellerVO" resultType="sellerVO">
+           SELECT
+               A.*, B.seq, B.upload_path
+           FROM sellers A left outer join tbl_file B on A.id = B.parent_seq
+           WHERE id &lt; #{id}
+           ORDER BY id DESC
+               LIMIT 1
+       </select>
+
+       <select id="selectSellerNext" parameterType="sellerVO" resultType="sellerVO">
+           SELECT
+               A.*, B.seq, B.upload_path
+           FROM sellers A left outer join tbl_file B on A.id = B.parent_seq
+           WHERE id &gt; #{id}
+           ORDER BY id ASC
+               LIMIT 1
+       </select>-->
+
+</mapper>

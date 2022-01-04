@@ -1,0 +1,110 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.teachingcash.saadmin.mapper.PopupMapper">
+    <sql id="where">
+        <if test='search_enabled != null and !search_enabled.equals("")'>
+            AND (enabled LIKE CONCAT(#{search_enabled}))
+        </if>
+        <if test='search_title != null and !search_title.equals("")'>
+            AND (title LIKE CONCAT('%',#{search_title},'%'))
+        </if>
+    </sql>
+    <select id="selectPopup" parameterType="popupVO" resultType="popupVO">
+        SELECT
+            A.*, B.id as files_id, B.upload_path, B.original_name
+        FROM popups A left outer join files B on A.id = B.parent_id and B.parent_type = 'popup'
+        WHERE A.id = #{id}
+    </select>
+
+    <select id="selectCntPopup" parameterType="popupVO" resultType="int">
+        SELECT
+        count(*)
+        FROM popups
+        WHERE 1 = 1
+        <include refid="where"/>
+    </select>
+
+    <insert id="insertPopup" parameterType="popupVO">
+        insert into popups (title, date_start, date_end, link, click_count, enabled, reg_datetime)
+        values (#{title}, #{date_start}, #{date_end}, #{link}, #{click_count}, #{enabled}, NOW());
+    </insert>
+    <delete id="deletePopup" parameterType="popupVO">
+        DELETE FROM
+            popups
+        WHERE
+            id = #{id}
+    </delete>
+    <select id="listPopup" parameterType="popupVO" resultType="popupVO">
+        SELECT
+        A.*, B.id as files_id, B.upload_path, B.original_name
+        FROM popups A left outer join files B on A.id = B.parent_id and B.parent_type = 'popup'
+        where 1=1
+        <include refid="where"/>
+        order by A.id DESC
+        LIMIT #{start}, #{limit}
+    </select>
+    <!--
+        <select id="listPopupTopPost" parameterType="popupVO" resultType="popupVO">
+            SELECT
+                A.*, B.seq, B.upload_path
+            FROM popups A left outer join tbl_file B on A.id = B.parent_seq
+            where 1=1 and is_toppost = 'Y'
+            order by A.id DESC
+            offset 1 limit 3
+        </select>
+
+        <select id="getTopPost" resultType="popupVO">
+            SELECT
+                A.*, B.seq, B.upload_path
+            FROM popups A left outer join tbl_file B on A.id = B.parent_seq
+            where 1=1 and is_toppost = 'Y'
+            order by A.id DESC
+            offset 0 limit 1
+        </select>-->
+
+    <update id="update" parameterType="popupVO">
+        UPDATE
+            popups
+        SET
+            title = #{title},
+            date_start = #{date_start},
+            date_end = #{date_end},
+            link  = #{link},
+            click_count = #{click_count},
+            enabled  = #{enabled},
+            reg_datetime = NOW()
+        WHERE
+            id = #{id}
+    </update>
+
+    <select id="getMaxPkPopup" resultType="int">
+        select max(id) from popups
+    </select>
+    <!--
+       <select id="listCategory" resultType="popupVO">
+           select category from popups group by category
+       </select>
+
+       <select id="listCategoryEn" resultType="popupVO">
+           select category_en from popups group by category_en
+       </select>
+
+       <select id="selectPopupPrev" parameterType="popupVO" resultType="popupVO">
+           SELECT
+               A.*, B.seq, B.upload_path
+           FROM popups A left outer join tbl_file B on A.id = B.parent_seq
+           WHERE id &lt; #{id}
+           ORDER BY id DESC
+               LIMIT 1
+       </select>
+
+       <select id="selectPopupNext" parameterType="popupVO" resultType="popupVO">
+           SELECT
+               A.*, B.seq, B.upload_path
+           FROM popups A left outer join tbl_file B on A.id = B.parent_seq
+           WHERE id &gt; #{id}
+           ORDER BY id ASC
+               LIMIT 1
+       </select>-->
+
+</mapper>

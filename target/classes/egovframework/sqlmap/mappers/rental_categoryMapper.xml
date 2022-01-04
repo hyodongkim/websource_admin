@@ -1,0 +1,76 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.teachingcash.saadmin.mapper.Rental_categoryMapper">
+    <sql id="where">
+        <if test='search_name != null'>
+            AND (name LIKE CONCAT('%',#{search_name},'%'))
+        </if>
+        <if test='search_code != null'>
+            AND (code LIKE CONCAT('%',#{search_code},'%'))
+        </if>
+        <if test='search_enabled != null'>
+            AND (enabled LIKE CONCAT('%',#{search_enabled},'%'))
+        </if>
+    </sql>
+
+    <select id="selectRental_category" parameterType="rental_categoryVO" resultType="rental_categoryVO">
+        SELECT
+            A.*, B.id as files_id, B.upload_path, B.original_name
+        FROM rental_categories A left outer join files B on A.id = B.parent_id and B.parent_type = 'rental_category'
+        WHERE A.id = #{id}
+    </select>
+
+    <select id="selectCntRental_category" parameterType="rental_categoryVO" resultType="int">
+        SELECT
+        count(*)
+        FROM rental_categories
+        WHERE 1 = 1
+        <include refid="where"/>
+    </select>
+
+    <insert id="insertRental_category" parameterType="rental_categoryVO">
+        insert into rental_categories (name, code, enabled, visible_order, reg_datetime)
+        values (#{name}, #{code}, #{enabled}, #{visible_order}, NOW());
+    </insert>
+
+    <delete id="deleteRental_category" parameterType="rental_categoryVO">
+        DELETE FROM
+            rental_categories
+        WHERE
+            id = #{id}
+    </delete>
+
+    <select id="listRental_category" parameterType="rental_categoryVO" resultType="rental_categoryVO">
+        SELECT
+        A.*, B.id as files_id, B.upload_path, B.original_name
+        FROM rental_categories A left outer join files B on A.id = B.parent_id and B.parent_type = 'rental_category'
+        where 1=1
+        <include refid="where"/>
+        order by A.id DESC
+        LIMIT #{start}, #{limit}
+    </select>
+
+    <update id="update" parameterType="rental_categoryVO">
+        UPDATE
+            rental_categories
+        SET
+            name = #{name},
+            code = #{code},
+            enabled  = #{enabled},
+            visible_order = #{visible_order},
+            reg_datetime = NOW()
+        WHERE
+            id = #{id}
+    </update>
+
+    <select id="getMaxPkRental_category" resultType="int">
+        select max(id) from rental_categories
+    </select>
+
+    <select id="listEnabledRentalCategory" resultType="rental_categoryVO">
+        SELECT *
+        FROM rental_categories
+        WHERE enabled = '사용'
+        ORDER BY visible_order ASC
+    </select>
+</mapper>

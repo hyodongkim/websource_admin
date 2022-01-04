@@ -1,0 +1,158 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.teachingcash.saadmin.mapper.MemberMapper">
+    <sql id="where">
+        <if test="search_type != null and !search_type.equals('') ">
+            AND (`type` LIKE #{search_type})
+        </if>
+        <if test="search_name != null and !search_name.equals('')">
+            AND (name LIKE CONCAT('%',#{search_name},'%') or email LIKE CONCAT('%',#{search_name},'%'))
+        </if>
+        <if test="search_enabled != null and !search_enabled.equals('')">
+            AND (enabled LIKE #{search_enabled})
+        </if>
+        <if test='enabled != "탈퇴"'>
+            AND (enabled = '이용중' or enabled = '휴면예정' or enabled = '휴면')
+        </if>
+        <if test='enabled == "탈퇴"'>
+            AND enabled = '탈퇴'
+        </if>
+        <if test="search_signup_date_start != null and !search_signup_date_start.equals('')">
+            AND left(reg_datetime,10) &gt;= #{search_signup_date_start}
+        </if>
+        <if test="search_signup_date_end  != null and !search_signup_date_end.equals('')">
+            AND left(reg_datetime,10) &lt;= #{search_signup_date_end}
+        </if>
+
+        <if test="search_leave_date_start != null and !search_leave_date_start.equals('')">
+            AND left(leave_datetime,10) &gt;= #{search_leave_date_start}
+        </if>
+        <if test="search_leave_date_end  != null and !search_leave_date_end.equals('')">
+            AND leave_datetime &lt;= #{search_leave_date_end}
+        </if>
+    </sql>
+
+    <sql id="whereLeave">
+        <if test="date_start != null and !date_start.equals('') ">
+            AND (left(leave_datetime,10) &gt;= #{date_start})
+        </if>
+        <if test="date_end != null and !date_end.equals('') ">
+            AND (left(leave_datetime,10) &lt;= #{date_end})
+        </if>
+        <if test="keyword != null and !keyword.equals('')">
+            AND (name LIKE CONCAT('%',#{keyword},'%') or email LIKE CONCAT('%',#{keyword},'%'))
+        </if>
+    </sql>
+
+    <select id="selectMember" parameterType="memberVO" resultType="memberVO">
+        SELECT
+            A.*, B.id as files_id, B.upload_path, B.original_name
+        FROM members A left outer join files B on A.id = B.parent_id and B.parent_type = 'profile'
+        WHERE A.id = #{id}
+    </select>
+
+    <select id="selectCntMember" parameterType="memberVO" resultType="int">
+        SELECT
+        count(*)
+        FROM members
+        WHERE 1 = 1
+        <include refid="where"/>
+    </select>
+
+
+    <delete id="deleteMember" parameterType="memberVO">
+        DELETE FROM
+            members
+        WHERE
+            id = #{id}
+    </delete>
+    <select id="listMember" parameterType="memberVO" resultType="memberVO">
+        SELECT
+        (select count(*) from businesses where member_id = A.id) as num_of_business, A.*
+        FROM members A
+        where 1=1
+        <include refid="where"/>
+        order by A.id DESC
+        LIMIT #{start}, #{limit}
+    </select>
+
+    <delete id="leave" parameterType="memberVO">
+        DELETE FROM
+            members
+        WHERE
+            id = #{id}
+    </delete>
+
+    <delete id="leaveBusinesses" parameterType="memberVO">
+        delete from
+            businesses
+        where member_id = #{id}
+    </delete>
+
+    <update id="update" parameterType="memberVO">
+        UPDATE
+            members
+        SET
+            type = #{type}
+        WHERE
+            id = #{id}
+    </update>
+
+    <update id="resetPassword" parameterType="String">
+        update members set
+            pin = '$2a$10$wRKKg0vm20MHXwcf2nWU/egGKfeuoqYwqjl3yvYxP/VI5nvzdlI3i',
+            retry_count = 0
+        where id = #{id}
+    </update>
+
+    <select id="getMaxPkMember" resultType="int">
+        select max(id) from members
+    </select>
+
+    <select id="selectAllMember" resultType="memberVO">
+        select * from members
+    </select>
+
+    <select id="listMemberLeave" parameterType="memberLeaveVO" resultType="memberLeaveVO">
+        SELECT
+        *
+        FROM member_leave
+        where 1=1
+        <include refid="whereLeave"/>
+        order by id DESC
+        LIMIT #{start}, #{limit}
+    </select>
+
+    <select id="selectCntMemberLeave" parameterType="memberLeaveVO" resultType="int">
+        SELECT
+        count(*)
+        FROM member_leave
+        WHERE 1 = 1
+        <include refid="whereLeave"/>
+    </select>
+
+    <insert id="insertLeaveMember" parameterType="memberLeaveVO">
+        insert into member_leave set
+            name = #{name},
+            email = #{email},
+            reg_datetime = NOW(),
+            leave_datetime = NOW()
+    </insert>
+
+    <select id="listPushMember" parameterType="com.teachingcash.saadmin.vo.NotificationVO" resultType="com.teachingcash.saadmin.vo.MemberVO">
+        select * from members where app_token != '' and enabled = '이용중' and agree_push_notification = 'ON'
+        <if test="app_os != null and app_os == 'android' ">
+            and app_os = 'android'
+        </if>
+        <if test="app_os != null and app_os == 'android' ">
+            and app_os = 'ios'
+        </if>
+        <if test="app_os != null and app_os == '전체' ">
+        </if>
+
+        <if test="type != null and type == '마케팅' ">
+            and agree_push_marketing = 'ON'
+        </if>
+
+    </select>
+</mapper>

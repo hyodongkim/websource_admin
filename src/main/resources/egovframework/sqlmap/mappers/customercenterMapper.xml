@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.teachingcash.saadmin.mapper.CustomercenterMapper">
+    <select id="selectCustomercenter" parameterType="customercenterVO" resultType="customercenterVO">
+        SELECT
+            *
+        FROM customercenter
+    </select>
+
+    <select id="selectCntCustomercenter" parameterType="customercenterVO" resultType="int">
+        SELECT
+        count(*)
+        FROM customercenter
+        WHERE 1 = 1
+        <!--<include refid="where"/>-->
+    </select>
+
+    <insert id="insertCustomercenter" parameterType="customercenterVO">
+        insert into customercenter (telephone, kakao, naver_blog, instagram, link, email, operating_hours)
+        values (#{telephone}, #{kakao}, #{naver_blog}, #{instagram}, #{link}, #{email}, #{operating_hours});
+    </insert>
+
+    <update id="update" parameterType="customercenterVO">
+        UPDATE
+            customercenter
+        SET
+            telephone = #{telephone},
+            kakao = #{kakao},
+            naver_blog = #{naver_blog},
+            instagram = #{instagram},
+            link = #{link},
+            email = #{email},
+            operating_hours = #{operating_hours}
+    </update>
+
+    <select id="getMaxPkCustomercenter" resultType="int">
+        select max(id) from customercenter
+    </select>
+    <!--
+       <select id="listCategory" resultType="customercenterVO">
+           select category from customercenter group by category
+       </select>
+
+       <select id="listCategoryEn" resultType="customercenterVO">
+           select category_en from customercenter group by category_en
+       </select>
+
+       <select id="selectCustomercenterPrev" parameterType="customercenterVO" resultType="customercenterVO">
+           SELECT
+               A.*, B.seq, B.upload_path
+           FROM customercenter A left outer join tbl_file B on A.id = B.parent_seq
+           WHERE id &lt; #{id}
+           ORDER BY id DESC
+               LIMIT 1
+       </select>
+
+       <select id="selectCustomercenterNext" parameterType="customercenterVO" resultType="customercenterVO">
+           SELECT
+               A.*, B.seq, B.upload_path
+           FROM customercenter A left outer join tbl_file B on A.id = B.parent_seq
+           WHERE id &gt; #{id}
+           ORDER BY id ASC
+               LIMIT 1
+       </select>-->
+
+</mapper>

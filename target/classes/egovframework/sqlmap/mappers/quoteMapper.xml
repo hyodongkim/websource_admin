@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.teachingcash.saadmin.mapper.QuoteMapper">
+
+    <sql id="where">
+        <if test='keyword != null and field.equals("all")'>
+            AND (name LIKE CONCAT('%',#{keyword},'%') or name_last LIKE CONCAT('%',#{keyword},'%') or phone LIKE CONCAT('%',#{keyword},'%'))
+        </if>
+        <if test='keyword != null and !field.equals("all")'>
+            AND ${field} LIKE CONCAT('%',#{keyword},'%')
+        </if>
+    </sql>
+
+    <select id="selectQuote" parameterType="quoteVO" resultType="quoteVO">
+        SELECT
+            reg_timestamp + '2 hour'::interval as reg_timestamp, *
+        FROM tbl_quote
+        WHERE pk_quote = #{pk_quote}
+    </select>
+
+    <select id="selectCntQuote" parameterType="quoteVO" resultType="int">
+        SELECT
+            count(*)
+        FROM tbl_quote
+        WHERE 1 = 1
+        <include refid="where"/>
+    </select>
+
+    <insert id="insertQuote" parameterType="quoteVO">
+        INSERT INTO
+            tbl_quote
+        (name, email, country, phone, platform, initial_cost, use_area, active_user_num, max_concurrent_users, service_num, app_num, is_agree, ip, reg_timestamp, process_yn)
+        values
+        (#{name}, #{email}, #{country}, #{phone}, #{platform}, #{initial_cost}, #{use_area}, #{active_user_num}, #{max_concurrent_users}, #{service_num}, #{app_num}, #{is_agree}, #{ip}, NOW(), 'N')
+    </insert>
+
+    <update id="updateProcessYN" parameterType="quoteVO">
+        UPDATE
+            tbl_quote
+        SET process_yn = #{process_yn}
+        WHERE
+            pk_quote = #{pk_quote}
+    </update>
+
+    <delete id="deleteQuote" parameterType="quoteVO">
+        DELETE FROM
+            tbl_quote
+        WHERE
+            pk_quote = #{pk_quote}
+    </delete>
+
+    <select id="listQuote" parameterType="quoteVO" resultType="java.util.HashMap">
+        SELECT
+            reg_timestamp + '2 hour'::interval as reg_timestamp, *
+        FROM tbl_quote
+        WHERE 1=1
+        <include refid="where"/>
+        ORDER BY pk_quote DESC
+        OFFSET #{start} limit #{limit}
+    </select>
+</mapper>

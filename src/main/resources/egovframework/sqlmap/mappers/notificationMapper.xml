@@ -1,0 +1,82 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.teachingcash.saadmin.mapper.NotificationMapper">
+    <sql id="where">
+        <if test="search_enabled != null  and !search_enabled.equals('')">
+            AND (enabled LIKE CONCAT(#{search_enabled}))
+        </if>
+        <if test="search_subject != null and !search_subject.equals('')">
+            AND (subject LIKE CONCAT('%',#{search_subject},'%'))
+        </if>
+    </sql>
+    <select id="selectNotification" parameterType="notificationVO" resultType="notificationVO">
+        SELECT
+            A.*, B.id as files_id, B.upload_path, B.original_name
+        FROM notifications A left outer join files B on A.id = B.parent_id and B.parent_type = 'notification'
+        WHERE A.id = #{id}
+    </select>
+
+    <select id="selectCntNotification" parameterType="notificationVO" resultType="int">
+        SELECT
+        count(*)
+        FROM notifications
+        WHERE 1 = 1
+        <include refid="where"/>
+    </select>
+
+    <insert id="insertNotification" parameterType="notificationVO">
+        insert into notifications (`type`, subject, content_editor, url, author, hit_count, enabled, push, push_to, push_msg, post_datetime, reg_datetime)
+        values (#{type}, #{subject}, #{content_editor}, #{url}, #{author}, #{hit_count}, #{enabled}, #{push}, #{push_to}, #{push_msg}, #{post_datetime}, NOW());
+    </insert>
+    <delete id="deleteNotification" parameterType="notificationVO">
+        DELETE FROM
+            notifications
+        WHERE
+            id = #{id}
+    </delete>
+    <select id="listNotification" parameterType="notificationVO" resultType="notificationVO">
+        SELECT
+        A.*, B.id as files_id, B.upload_path, B.original_name
+        FROM notifications A left outer join files B on A.id = B.parent_id and B.parent_type = 'notification'
+        where 1=1
+        <include refid="where"/>
+        order by A.id DESC
+        LIMIT #{start}, #{limit}
+    </select>
+
+    <update id="update" parameterType="notificationVO">
+        UPDATE
+            notifications
+        SET
+            type = #{type},
+            subject = #{subject},
+            content_editor = #{content_editor},
+            url = #{url},
+            author  = #{author},
+            hit_count = #{hit_count},
+            enabled  = #{enabled},
+            push  = #{push},
+            push_to  = #{push_to},
+            push_msg  = #{push_msg},
+            post_datetime  = #{post_datetime},
+            reg_datetime = NOW()
+        WHERE
+            id = #{id}
+    </update>
+
+    <select id="getMaxPkNotification" resultType="int">
+        select max(id) from notifications
+    </select>
+
+    <insert id="insertNotificationsMembers" parameterType="notificationMemberVO">
+        insert into notifications_members set
+            members_id = #{members_id},
+            notifications_id = #{notifications_id},
+            `read` = 'N',
+            `deleted` = 'N'
+    </insert>
+
+    <delete id="deleteNotificationsMembers" parameterType="notificationMemberVO">
+        delete from notifications_members where notifications_id = #{notifications_id}
+    </delete>
+</mapper>

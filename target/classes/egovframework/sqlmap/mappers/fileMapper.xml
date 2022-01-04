@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.teachingcash.saadmin.mapper.FileMapper">
+    <insert id="insertFile" parameterType="FileVO">
+        INSERT INTO files(
+            parent_type, original_name, saved_name, upload_path, parent_id
+        )
+        VALUES(
+                  #{parentType}, #{originalName}, #{savedName}, #{uploadPath}, #{parentId}
+              )
+    </insert>
+
+    <select id="selectFile" parameterType="FileVO" resultType="FileVO">
+        SELECT
+        id,
+        parent_type AS parentType,
+        original_name AS originalName,
+        saved_name AS savedName,
+        upload_path AS uploadPath,
+        parent_id AS parentId
+        FROM
+        files
+        <where>
+            <choose>
+                <when test="parentId !=null and parentId != 0">
+                    parent_id = #{parentId}
+                </when>
+                <when test="id != null and id != 0">
+                    id = #{id}
+                </when>
+                <when test="savedName != null and savedName != ''">
+                    saved_name = #{savedName}
+                </when>
+            </choose>
+            <if test="parentType != null and parentType != ''">
+                AND parent_type = #{parentType}
+            </if>
+        </where>
+
+        LIMIT 1
+    </select>
+
+    <delete id="deleteFile" parameterType="hashmap">
+        DELETE
+        FROM files
+        WHERE
+            id = #{id}
+    </delete>
+
+    <delete id="deleteFileBySeq" parameterType="int">
+        DELETE
+        FROM files
+        WHERE
+            id = #{id}
+    </delete>
+</mapper>

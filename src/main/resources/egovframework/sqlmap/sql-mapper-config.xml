@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE configuration PUBLIC "-//mybatis.org//DTD Config 3.0//EN" "http://mybatis.org/dtd/mybatis-3-config.dtd">
+
+<configuration>
+    <typeAliases>
+        <typeAlias alias="fileVO" type="com.teachingcash.common.vo.FileVO"/>
+
+        <!--앱 관리-->
+        <typeAlias alias="adminmemberVO" type="com.teachingcash.saadmin.vo.AdminmemberVO"/>
+        <typeAlias alias="versionVO" type="com.teachingcash.saadmin.vo.VersionVO"/>
+        <typeAlias alias="bannerVO" type="com.teachingcash.saadmin.vo.BannerVO"/>
+        <typeAlias alias="popupVO" type="com.teachingcash.saadmin.vo.PopupVO"/>
+        <typeAlias alias="policyVO" type="com.teachingcash.saadmin.vo.PolicyVO"/>
+        <typeAlias alias="configurationVO" type="com.teachingcash.saadmin.vo.ConfigurationVO"/>
+        <typeAlias alias="pushVO" type="com.teachingcash.saadmin.vo.PushVO"/>
+        <!--<typeAlias alias="privilegesVO" type="com.teachingcash.common.vo.PrivilegesVO"/>-->
+
+        <!--회원 관리-->
+        <typeAlias alias="memberVO" type="com.teachingcash.saadmin.vo.MemberVO"/>
+        <typeAlias alias="memberLeaveVO" type="com.teachingcash.saadmin.vo.MemberLeaveVO"/>
+        <typeAlias alias="businessesVO" type="com.teachingcash.saadmin.vo.BusinessesVO"/>
+        <typeAlias alias="adminmemberVO" type="com.teachingcash.saadmin.vo.AdminmemberVO"/>
+
+        <!--판매처 관리-->
+        <typeAlias alias="sellerVO" type="com.teachingcash.saadmin.vo.SellerVO"/>
+
+        <!--렌탈 관리-->
+        <typeAlias alias="rental_categoryVO" type="com.teachingcash.saadmin.vo.Rental_categoryVO"/>
+        <typeAlias alias="rental_productVO" type="com.teachingcash.saadmin.vo.Rental_productVO"/>
+        <typeAlias alias="sales_conditionVO" type="com.teachingcash.saadmin.vo.SalesConditionVO"/>
+        <typeAlias alias="last_monthVO" type="com.teachingcash.saadmin.vo.LastMonthVO"/>
+
+        <!--보험 관리-->
+        <typeAlias alias="insurance_categoryVO" type="com.teachingcash.saadmin.vo.Insurance_categoryVO"/>
+        <typeAlias alias="insurance_productVO" type="com.teachingcash.saadmin.vo.Insurance_productVO"/>
+
+        <!--게시판 관리-->
+        <typeAlias alias="notificationVO" type="com.teachingcash.saadmin.vo.NotificationVO"/>
+        <typeAlias alias="notificationMemberVO" type="com.teachingcash.saadmin.vo.NotificationMemberVO"/>
+        <typeAlias alias="surveyVO" type="com.teachingcash.saadmin.vo.SurveyVO"/>
+        <typeAlias alias="surveyExamplesVO" type="com.teachingcash.saadmin.vo.SurveyExamplesVO"/>
+        <typeAlias alias="customercenterVO" type="com.teachingcash.saadmin.vo.CustomercenterVO"/>
+        <typeAlias alias="faqVO" type="com.teachingcash.saadmin.vo.FaqVO"/>
+
+        <!--통계 관리-->
+        <!--<typeAlias alias="app_statsVO" type="com.teachingcash.common.vo.App_statsVO"/>-->
+        <!--<typeAlias alias="member_statsVO" type="com.teachingcash.common.vo.Member_statsVO"/>-->
+
+
+        <typeAlias alias="partnerVO" type="com.teachingcash.saadmin.vo.PartnerVO"/>
+        <typeAlias alias="quoteVO" type="com.teachingcash.saadmin.vo.QuoteVO"/>
+        <typeAlias alias="blogVO" type="com.teachingcash.saadmin.vo.BlogVO"/>
+
+    </typeAliases>
+</configuration>
